@@ -1,6 +1,6 @@
 # Tiny News
 
-For a detailed overview of this project from start to finish, check out [GregSamek.github.io/tinynews](https://GregSamek.github.io/tinynews)
+For a detailed overview of this project from start to finish, check out [GregSamek.github.io/tinynews](https://GregSamek.github.io/TinyNews)
 
 TinyNews is a collection of one million synthetically generated news bulletins and several language models scratch-trained on this data.  Evaluations suggests that TinyNews retains ~80% of the quality of the training data while using ~1/1000th the number of parameters as the models used to generate it.
 
@@ -40,4 +40,4 @@ Download one of the models from [🤗 Hugging Face](https://huggingface.co/colle
 }
 ```
 
-`/results/` directory contains loss curves, evaluations by Llama3 70B as a judge, etc. I walk through all of this on the [Project Page](https://GregSamek.github.io/tinynews)
+`/results/` directory contains loss curves, evaluations by Llama3 70B as a judge, etc. I walk through all of this on the [Project Page](https://GregSamek.github.io/TinyNews)

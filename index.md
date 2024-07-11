@@ -1,5 +1,3 @@
-# TinyNews
-
 <div style="display: flex; align-items: flex-start;">
   <img src="tinynews.jpg" alt="Baby reading the TinyNews newspaper" width="250" style="margin-right: 20px;">
   <div>
