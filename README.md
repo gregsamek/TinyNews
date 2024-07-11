@@ -1,6 +1,6 @@
 # Tiny News
 
-For a detailed overview of this project from start to finish, check out [GregSamek.github.io/tinynews](https://GregSamek.github.io/TinyNews)
+For a detailed overview of this project from start to finish, check out [GregSamek.github.io/TinyNews](https://GregSamek.github.io/TinyNews)
 
 TinyNews is a collection of one million synthetically generated news bulletins and several language models scratch-trained on this data.  Evaluations suggests that TinyNews retains ~80% of the quality of the training data while using ~1/1000th the number of parameters as the models used to generate it.
 
