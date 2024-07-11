@@ -37,7 +37,9 @@ How do I expect ~10 million parameters to produce anything other than gibberish?
 
 Like TinyStories, all of my training data was generated synthetically. Instead of fictional stories, my data consists of short news bulletins featuring a headline and a few sentence story summary. These are the kinds short reads you might hear on a radio station doing a news roundup:
 
-> **city council decides on scrapping old building** | the city council has decided to scrap an old building that has been standing vacant for years. the building, which was once a hub of activity, has fallen into disrepair and is now seen as an eyesore. the council has deemed it too expensive to renovate and has decided to tear it down. the decision has been met with mixed reactions, with some people sad to see the building go and others relieved that it will be replaced with something new. the city is already making plans for what to do with the empty lot.
+> **city council decides on scrapping old building**
+>
+>the city council has decided to scrap an old building that has been standing vacant for years. the building, which was once a hub of activity, has fallen into disrepair and is now seen as an eyesore. the council has deemed it too expensive to renovate and has decided to tear it down. the decision has been met with mixed reactions, with some people sad to see the building go and others relieved that it will be replaced with something new. the city is already making plans for what to do with the empty lot.
 
 The stories have a straightforward logical structure that I believed could be learned by a small model. I also liked that the headline of a story serves as an "attention sink" that grounds the entire bulletin. Headlines essentially act as an implicit instruction prompt.
 
