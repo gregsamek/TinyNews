@@ -1,0 +1,8 @@
+python-dotenv
+torch
+sentencepiece
+tiktoken
+safetensors
+requests
+thop
+tqdm

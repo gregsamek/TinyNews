@@ -1,0 +1,18 @@
+{    
+    "model":  {
+        "vocab_size": 8192,
+        "context_length": 128,
+        "d_embedding": 256,
+        "d_intermediate": 1024,
+        "n_heads": 8,
+        "n_layers": 8,
+        "qkv_bias": false
+    },
+    "train": {
+        "peak_lr": 0.001,
+        "warmup_ratio": 0.01,
+        "n_epochs": 2,
+        "batch_size": 8,
+        "weight_decay": 0.1
+    }
+}
