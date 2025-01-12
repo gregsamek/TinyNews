@@ -29,19 +29,19 @@ TinyNews was trained at four sizes, shown in the chart below (size in millions o
 
 The vocabulary size and context length were determined after tokenizing the training data, discussed in a later section. These parameters are held constant across all models. 
 
-With each doubling of the embedding dimensions, the number of layers is also doubled. The width of the intermediate Feed Forward layers was always defined as 4 * Embeddings. I decided to scale the number of attention heads with model size, so that the dimensions of each head remained constant at 32. This also means that for each model the number of layers happens to equal the number of heads.
+With each doubling of the embedding dimensions, the number of layers was also doubled. The width of the intermediate Feed Forward layers was always defined as 4 * Embeddings. I decided to scale the number of attention heads with model size, so that the dimensions of each head remained constant at 32. This also means that for each model the number of layers happened to equal the number of heads.
 
 ## Training Data
 
-How do I expect ~10 million parameters to produce anything other than gibberish? By training on an *extremely* focused dataset. TinyStories models were trained on nothing but [children's stories](https://huggingface.co/datasets/roneneldan/TinyStories/viewer/default/train?p=2&row=206) written in English with the vocabulary of a 3-year-old. The models do not write javascript or french poetry. They aren't attempting to compress web-scale data.
+How can a 10 million parameter model produce anything other than gibberish? By training on an *extremely* focused dataset. TinyStories models were trained on nothing but [children's stories](https://huggingface.co/datasets/roneneldan/TinyStories/viewer/default/train?p=2&row=206) written in English with the vocabulary of a 3-year-old. The models were not asked to write javascript or french poetry. They weren't attempting to compress web-scale data.
 
-Like TinyStories, all of my training data was generated synthetically. Instead of fictional stories, my data consists of short news bulletins featuring a headline and a few sentence story summary. These are the kinds short reads you might hear on a radio station doing a news roundup:
+Like TinyStories, all of my training data was generated synthetically. Instead of fictional stories, my data consisted of short news bulletins featuring a headline and a few sentence summary. These are the kinds of short reads you might hear on a radio station doing a news roundup:
 
 > **city council decides on scrapping old building**
 >
 >the city council has decided to scrap an old building that has been standing vacant for years. the building, which was once a hub of activity, has fallen into disrepair and is now seen as an eyesore. the council has deemed it too expensive to renovate and has decided to tear it down. the decision has been met with mixed reactions, with some people sad to see the building go and others relieved that it will be replaced with something new. the city is already making plans for what to do with the empty lot.
 
-The stories have a straightforward logical structure that I believed could be learned by a small model. I also liked that the headline of a story serves as an "attention sink" that grounds the entire bulletin. Headlines essentially act as an implicit instruction prompt.
+The stories had a straightforward logical structure that I believed could be learned by a small model. I also liked that the headline of a story serves as an "attention sink" that grounds the entire bulletin. Headlines essentially act as an implicit instruction prompt.
 
 ### Vocabulary
 
@@ -51,11 +51,11 @@ Probably my most original idea from this project was to minimize the appearance 
 
 ### Seeding
 
-When generating millions of samples, you can't just rely on temperature to create a diverse dataset. Instead, I seed my generations. TinyStories used a pretty simple seeding strategy of selecting three words - one noun, verb, and adjective - from a list of 1500 basic english words. These three words are then incorporated into one story. 
+When generating millions of samples, it's a good idea to seed generations, rather than exclusively relying on temperature. TinyStories used a simple seeding strategy of selecting three words - one noun, verb, and adjective - from a list of 1500 basic english words. These three words were then incorporated into one story. 
 
-I think this was a good approach for TinyStories. The combinatorics make for a huge number of possible combinations and because the final product is a fictional story that can contain fantastical elements, even improbably combinations of words can still make for a plausible output. In hindsight, I probably should've just stuck to this simple approach. But I wanted to do things differently than TinyStories when possible, and so I took an approach that admittedly may be a bit overengineered.
+I think this was a good approach for TinyStories. The combinatorics made for a huge number of possible combinations and because the final product was a fictional story with potentially fantastical elements, even improbably combinations of words can still make for a plausible output. In hindsight, I probably should've just stuck to this simple approach, but I wanted to try different methods than TinyStories when possible.
 
-To create a list of seed words, I referenced [word frequencies](https://simple.wiktionary.org/wiki/Wiktionary:BNC_spoken_freq) of the British National Corpus, and added a further few hundred words by cross referencing other "common words" lists. This gave me a list of ~4,500 "headwords" (hack) and ~20,000 word forms (hacked, hacker, etc). 
+I first created a list of seed words, referencing [word frequencies](https://simple.wiktionary.org/wiki/Wiktionary:BNC_spoken_freq) of the British National Corpus, and added a further few hundred words by cross referencing other "common words" lists. This gave me a list of ~4,500 "headwords" (hack) and ~20,000 word forms (hacked, hacker, etc). 
 
 There was a high variance of word forms per headword. A word like "rural" only has one form. But a headword like "obsess" can be used as a verb, an adverb (obsessively), a noun (obsession), an adjective (obsessive), not to mention different tenses. This means that if I sampled from the list of 4,500 headwords, I would be undersampling words with many forms, potentially making them difficult to learn. Ideally, my tokenizer would learn common word fragments and break a word like "obsessive" into something like "_obsess" and  "ive" and the language model would learn a good embedding for "obsess" that is shared between every form of the word.[^2] Rather than sample from the list of all 20,000 word forms, I split the difference by chunking headwords into [9,680 lists](https://github.com/gregsamek/TinyNews/blob/master/vocabulary.json) of no more than three words:
 
@@ -77,7 +77,7 @@ Llama 8 still occasionally produced broken HTML, but it was fairly easy to catch
 
 After parsing and cleaning the generated data, I made the decision to convert all text to lowercase. As with the previous decisions I've mentioned, this was done in service of making the data as easy as possible to learn. I'm much more interested in observing a model's ability to understand the meaning of words than its ability to capitalize the first word of a sentence. Capitalization would mean that "New" and "new" would be completely different tokens with different learned embeddings. 
 
-The TinyNews tokenizer is a Byte Pair Encoder using the sentencepiece library. Four different vocabulary sizes were trained: 1024, 2048, 4096, 8192, and 16384. These were compared to several of OpenAI's pretrained tiktoken models. My custom tokenizer reaches virtual parity with the tiktoken models, but with an order of magnitude smaller vocabulary:
+The TinyNews tokenizer is a Byte Pair Encoder using the sentencepiece library. Four different vocabulary sizes were trained: 1024, 2048, 4096, 8192, and 16384. These were compared to several of OpenAI's pretrained tiktoken models. My custom tokenizer reached virtual parity with the tiktoken models, but with an order of magnitude smaller vocabulary:
 
 | Tokenizer |  Vocab  | Avg # Tokens |
 |-----------|---------|--------------|
@@ -90,7 +90,7 @@ The TinyNews tokenizer is a Byte Pair Encoder using the sentencepiece library. F
 | gpt-4     | 100,277 |     82.1     |
 | gpt-4o    | 200,019 |     81.6     |
 
-Inspecting the tokenized training data, I see the diminishing returns of increasing the size of my vocabulary. The 16,384 is identical to the 8,192 model, so I use 8,192 to train my language models. A quick check revealed that ~99.8% of the news bulletins have 128 tokens or less, so I chose this as my context length.
+Increasing the size of the vocabulary showed diminishing returns, which is to be expected. The 16,384 model was identical to the 8,192 model, so I used 8,192 to train my language models. A quick check revealed that ~99.8% of the news bulletins had 128 tokens or less, so I chose this as my context length.
 
 <img src="results/images/Tokenization_Efficiency_by_Vocabulary_Size.png" alt="histogram of token counts of news bulletins" width="600">
 
@@ -165,7 +165,7 @@ The smallest model clearly repeats itself - "the sights and sounds of the sights
 
 To quantify the text quality, I again used Llama 3 70B - this time as a judge. I asked the judge to consider how well the news bulletin matched the headline, the logical coherence of the prose, grammatical and semantic correctness, etc. I also made the judge aware of the instructions used during generation so that they would not be penalized for their simplistic language. Finally, I instructed the model to first write notes before assigning a grade.
 
-For all of these quality assessments, I use a sample size of 128. To begin, I established a baseline for the original 8B and 70B validation data. To my surprise, there was not a statistically significant difference between the models at this sample size.
+For all of these quality assessments, I used a sample size of 128. To begin, I established a baseline for the original 8B and 70B validation data. To my surprise, there was not a statistically significant difference between the models at this sample size.
 
 ```
   8b_original: 4.867
@@ -173,7 +173,7 @@ For all of these quality assessments, I use a sample size of 128. To begin, I es
       p-value: 0.094
 ```
 
-I next use the 59M model to briefly explore a couple of different inference parameters: temp=0, temp=0.5 with topk=16, and temp=1.0 with topk=32. I extract the headlines from the samples above, feeding them in as if they were prompts:
+I next used the 59M model to briefly explore a couple of different inference parameters: `temp=0`, `temp=0.5` with `topk=16`, and `temp=1.0` with `topk=32`. I extracted the headlines from the samples above, feeding them in as if they were prompts:
 
 ```
  8b_temp_0_topk_None: 3.945
@@ -185,7 +185,7 @@ I next use the 59M model to briefly explore a couple of different inference para
 
 0 Temp vs. 1 Temp p-value: 0.006
 ```
-Quality seems to hold up for (0.5, 16), but clearly drops off at (1.0, 32). I decided I decided to use temp=0 with the 70B headlines to evaluate the remaining three model sizes:
+Quality seemed to hold up for (0.5, 16), but clearly drops off at (1.0, 32). I decided to use `temp=0` with the 70B headlines to evaluate the remaining three model sizes:
 
 ```
  xs_model: 2.945
@@ -202,7 +202,7 @@ On the bright side, even the 28M model scores a solid 4/5, meaning that we've re
 
 <img src="results/images/performance_scaling_70b_as_judge.png" alt="output quality as judged by Llama 3 70B" width="500">
 
-There's one last thing to test. I trained the models with a BOS token, meaning that they're capable of generating *their own* headlines. Obviously performing this evaluation at temp=0 makes no sense, so I instead use the temp=1.0, topk=32 parameters from earlier:
+Now for one final test... I trained the models with a BOS token, meaning that they're capable of generating *their own* headlines. Performing this evaluation at `temp=0` obviously makes no sense, as every output would be identical. I instead used the `temp=1.0`, `topk=32` parameters from earlier:
 
 ```
  xs_model: 2.445
@@ -210,7 +210,7 @@ There's one last thing to test. I trained the models with a BOS token, meaning t
   m_model: 3.664
   l_model: 3.668
 ```
-The 59M model scores slightly better with its own prompts, but this is not at all significant: 
+The 59M model scored slightly better with its own prompts, but this was not at all significant: 
 
 ```
 l_model_self: 3.668
@@ -222,7 +222,7 @@ l_model_70B : 3.484
 
 ## Costs
 
-This project cost ~$30 in total, but it should've cost ~$10. Nearly all of the cost was from generating the synthetic data, and most of *that* cost was the ~20% of my data that was generated by Llama 3 70B. I generated so much data with 70B because I had expected a larger difference in quality and had planned on doing some additional experiments that took advantage of that - for example first training on 8B data and then annealing on 70B data.
+This project cost ~$30 in total, but it should've cost ~$10. Nearly all of the cost was from generating the synthetic data, and most of *that* cost was the ~20% of my data that was generated by Llama 3 70B. I generated data with 70B because I expected a larger difference in quality and had planned on doing some additional experiments that took advantage of that - for example first training on 8B data and then annealing on 70B data.
 
 ## Footnotes
 
